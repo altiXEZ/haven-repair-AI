@@ -5,5 +5,6 @@ i have a plan to start an AI that use LLM and user-friendly language as a tool t
 -queued
 -getting repaired
 -ready to pick up
-and thats will be verifedby a verifyiying coding systeme that work by  an Base64 encoding to generate 8-characters to be used as a password for the costumer to pick up the device and link the device with the repair haven app as a way for a Security systeme and many many more features
-# and this is only part 1
+and thats will be verifedby a verifyiying coding systeme that work by  an Base64 encoding to generate 8-characters to be used as a password for the costumer to pick up the device and link the device with the repair haven app as a way for a Security systeme .
+and the app will have many many more features that i'llbe working on
+
