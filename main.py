@@ -10,10 +10,10 @@ def load_inventory(path="C:\\Users\\altix\\Desktop\\repair-H\\.vscode\\inventory
 
 from llama_cpp import Llama
 
-# 📍 Path to your quantized model file
+#Path to your quantized model file
 LLM_PATH = "C:\\Users\\altix\\Desktop\\Models\\mistral-7b-instruct-v0.1.Q4_K_M.gguf"
 
-# ⚙️ Load model with GPU acceleration
+#Load model with GPU acceleration
 llm = Llama(
     model_path=LLM_PATH,
     n_ctx=2048,           # Context window (2048 is standard, Mistral supports more)
@@ -47,23 +47,23 @@ chat_history = [
 def chat_with_haven(user_input):
     chat_history.append({"role": "user", "content": user_input})
 
-    # 🔁 Build the full prompt including system and previous messages
+    #Build the full prompt including system and previous messages
     prompt = SYSTEM_PROMPT + "\n\n"
     for msg in chat_history:
         role = "User" if msg["role"] == "user" else "Haven"
         prompt += f"{role}: {msg['content']}\n"
     prompt += "Haven:"
 
-    # 🔍 Generate response from local LLM
+    #Generate response from local LLM
     output = llm(prompt, max_tokens=512, stop=["User:", "Haven:"], temperature=0.7)
     reply = output["choices"][0]["text"].strip()
 
-    # 📦 Inventory check
+    #Inventory check
     inventory = load_inventory()
     for product_name in inventory:
         if product_name.lower() in user_input.lower():
             stock_reply = check_stock(product_name, inventory)
-            reply += "\n\n📦 Inventory Check:\n" + stock_reply
+            reply += "\n\n Inventory Check:\n" + stock_reply
             break
 
     chat_history.append({"role": "assistant", "content": reply})
@@ -75,7 +75,7 @@ def chat_with_haven(user_input):
     for product_name in inventory:
         if product_name.lower() in user_input.lower():
             stock_reply =check_stock(product_name, inventory)
-            reply += "\n\n📦 Inventory Check:\n" + stock_reply
+            reply += "\n\n Inventory Check:\n" + stock_reply
             break
 
     chat_history.append({"role": "assistant", "content": reply})
@@ -90,7 +90,7 @@ def check_stock(product_name, inventory):
     else:
         return f"Sorry, '{product_name}' is currently out of stock."
 
-# 💬 Loop
+# Loop
 while True:
     try:
         user_input = input("user: ")
