@@ -6,20 +6,23 @@ def load_inventory(path="C:\\Users\\altix\\Desktop\\repair-H\\.vscode\\inventory
             return json.load(f)
     except FileNotFoundError:
         return {}
-    {
-  "model": "microsoft/phi-3-mini-128k:free",
-  "messages": [...],
-  "temperature": 0.7,
-  "stream": false,       
-  "logprobs": null,        
-  "echo": false            
-}
+    
 
+from llama_cpp import Llama
 
-import requests
+# 📍 Path to your quantized model file
+LLM_PATH = "C:\\Users\\altix\\Desktop\\Models\\mistral-7b-instruct-v0.1.Q4_K_M.gguf"
 
-API_KEY = "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"  # 🔑 Replace with your OpenRouter API key
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
+# ⚙️ Load model with GPU acceleration
+llm = Llama(
+    model_path=LLM_PATH,
+    n_ctx=2048,           # Context window (2048 is standard, Mistral supports more)
+    n_batch=512,          # Controls batch size for generation (safe default)
+    n_threads=12,         # Adjust to your CPU core count
+    n_gpu_layers=30,      # Use ~30 layers on GPU (fits in 4–5GB VRAM)
+    verbose=True          # Print detailed logs (can turn off later)
+)
+    
 
 SYSTEM_PROMPT = (
     "You are Haven, an AI assistant for a phone repair shop called Repair Haven.\n"
@@ -43,35 +46,49 @@ chat_history = [
 
 def chat_with_haven(user_input):
     chat_history.append({"role": "user", "content": user_input})
-    
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
 
-    body = {
-        "model": "microsoft/phi-4-reasoning-plus:free",
-        "messages": chat_history,
-        "temperature": 0.7
-    }
+    # 🔁 Build the full prompt including system and previous messages
+    prompt = SYSTEM_PROMPT + "\n\n"
+    for msg in chat_history:
+        role = "User" if msg["role"] == "user" else "Haven"
+        prompt += f"{role}: {msg['content']}\n"
+    prompt += "Haven:"
 
-    response = requests.post(API_URL, headers=headers, json=body)
+    # 🔍 Generate response from local LLM
+    output = llm(prompt, max_tokens=512, stop=["User:", "Haven:"], temperature=0.7)
+    reply = output["choices"][0]["text"].strip()
 
-    if response.status_code != 200:
-        return f"❌ Error: {response.status_code} - {response.text}"
+    # 📦 Inventory check
+    inventory = load_inventory()
+    for product_name in inventory:
+        if product_name.lower() in user_input.lower():
+            stock_reply = check_stock(product_name, inventory)
+            reply += "\n\n📦 Inventory Check:\n" + stock_reply
+            break
 
+    chat_history.append({"role": "assistant", "content": reply})
+    return reply
     reply = response.json()["choices"][0]["message"]["content"]
 
     # Check inventory if user mentions a product
     inventory = load_inventory()
     for product_name in inventory:
         if product_name.lower() in user_input.lower():
-            stock_reply =check_stocK(product_name, inventory)
+            stock_reply =check_stock(product_name, inventory)
             reply += "\n\n📦 Inventory Check:\n" + stock_reply
             break
 
     chat_history.append({"role": "assistant", "content": reply})
     return reply.strip()
+
+def check_stock(product_name, inventory):
+    stock = inventory.get(product_name, None)
+    if stock is None:
+        return f"Sorry, we do not have information about '{product_name}' in our inventory."
+    elif stock > 0:
+        return f"Yes, '{product_name}' is in stock ({stock} available)."
+    else:
+        return f"Sorry, '{product_name}' is currently out of stock."
 
 # 💬 Loop
 while True:
