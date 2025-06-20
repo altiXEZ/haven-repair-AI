@@ -2,3 +2,4 @@ repair haven v1:
 -the first prototype of the backend prompt to power the AI.
 -the prompt now include a JSON file that run the shop inventory.
 -run on the vs code terminal.
+-downloaded a bunch of local LLm's:(-mistral-7b-instruct-v0.1.Q4_K_M.gguf. -phi-2.Q4_K_M.gguf.) to learn and compare at the diffrences and speed between them.
